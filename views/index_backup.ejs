@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог біполярних транзисторів</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            padding: 1em;
+        }
+
+        .catalog {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 20px;
+        }
+
+        .item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 15px;
+            padding: 18px;
+            text-align: left;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            box-sizing: border-box;
+        }
+
+        .item img {
+            width: 100%;
+            height: auto;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        .item p {
+            margin: 5px 0;
+        }
+
+        .add-form label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .add-form button {
+            display: block;
+            margin-top: 10px;
+        }
+
+        .add-form {
+          display: none;
+        }
+
+        .sort-selector {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .sort-selector label {
+            margin-right: 10px;
+        }
+
+        .sort-selector select {
+            padding: 5px;
+            font-size: 14px;
+        }
+    </style>
+
+<script>
+  function toggleAddForm() {
+      const addForm = document.getElementById('addForm');
+      addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function addProduct() {
+            const productName = document.getElementById('productName').value;
+            const productType = document.getElementById('productType').value;
+            const pcMax = document.getElementById('pcMax').value;
+            const UEce_max = document.getElementById('UEce_max').value;
+            const UEcb_max = document.getElementById('UEcb_max').value;
+            const UEeb_max = document.getElementById('UEeb_max').value;
+            const Ic_max = document.getElementById('Ic_max').value;
+            const F_max = document.getElementById('F_max').value;
+            const H21_e = document.getElementById('H21_e').value;
+            const CMax = document.getElementById('CMax').value;
+
+            const image = document.getElementById('image').files[0];
+
+            const formData = new FormData();
+            formData.append('productName', productName);
+            formData.append('productType', productType);
+            formData.append('pcMax', pcMax);
+            formData.append('UEce_max', UEce_max);
+            formData.append('UEcb_max', UEcb_max);
+            formData.append('UEeb_max', UEeb_max);
+            formData.append('Ic_max', Ic_max);
+            formData.append('F_max', F_max);
+            formData.append('H21_e', H21_e);
+            formData.append('CMax', CMax);
+            formData.append('image', image);
+
+            const response = fetch('/addProduct', {
+                method: 'POST',
+                body: formData,
+            });
+  }
+
+  window.addEventListener("load", (event) => {
+    toggleAddForm();
+  });
+</script>
+</head>
+<body>
+    <header>
+        <h1>Каталог біполярних транзисторів</h1>
+    </header>
+
+    <div class="add-button">
+      <button onclick="toggleAddForm()">Додати</button>
+    </div>
+
+    <div class="sort-selector">
+        <label for="sortSelector">Сортувати за:</label>
+        <select id="sortSelector" onchange="sortCatalog()">
+            <option value="UCE_Max">Макс. напруга Uce</option>
+            <option value="PC_Max">Макс. потужність Pc</option>
+            <option value="T">Макс. температура T</option>
+            <option value="HE">Коефіцієнт підсилення HE</option>
+        </select>
+    </div>
+
+    <div class="add-form" id="addForm">
+      <label for="image">Зображення продукту:</label>
+      <input type="file" id="image" name="image" accept="image/*">
+
+      <label for="productName">Назва продукту:</label>
+      <input type="text" id="productName" name="productName" required>
+
+      <label for="productType">Тип продукту:</label>
+      <input type="text" id="productType" name="productType" required>
+
+      <label for="pcMax">Максимальна потужність розсіювання транзистора Pc_max:</label>
+      <input type="text" id="pcMax" name="pcMax" required>
+
+      <label for="UEce_max">Максимальна напруга переходу колектор-емітер транзистора Uce_max:</label>
+      <input type="text" id="UEce_max" name="UEce_max" required>
+
+      <label for="UEcb_max">Максимальна напруга переходу колектор-база транзистора Ucb_max:</label>
+      <input type="text" id="UEcb_max" name="UEcb_max" required>
+
+      <label for="UEeb_max">Максимальна напруга переходу емітер-база транзистора Ueb_max:</label>
+      <input type="text" id="UEeb_max" name="UEeb_max" required>
+
+      <label for="Ic_max">Максимальний струм колектора транзистора Ic_max:</label>
+      <input type="text" id="Ic_max" name="Ic_max" required>
+
+      <label for="F_max">Гранична частота транзистора Fmax:</label>
+      <input type="text" id="F_max" name="F_max" required>
+
+      <label for="H21_e">Коефіцієнтом підсилення транзистора по струму he:</label>
+      <input type="text" id="H21_e" name="H21_e" required>
+
+      <label for="CMax">Максимальна температура переходів транзистора в С max:</label>
+      <input type="text" id="CMax" name="CMax" required>
+
+      <button onclick="addProduct()">Додати продукт</button>
+    </div>
+
+
+    <div class="catalog" id="catalog">
+
+          <% for(var i=0; i < data.length; i++) { %> 
+              <div class="item">
+                <img src="<%= data[i].ImagePath %>" alt="Product Image">
+                <p>Номер: <%= data[i].ID %></p>
+                <p>Назва: <%= data[i].Name %></p>
+                <p>Тип: <%= data[i].Type %></p>
+                <p>Pc_max: <%= data[i].PC_Max %>W</p>
+                <p>UEce_max: <%= data[i].UCE_Max %>V</p>
+                <p>UEcb_max: <%= data[i].UCB_Max %>V</p>
+                <p>UEeb_max: <%= data[i].UEB_Max %>V</p>
+                <p>Ic_max: <%= data[i].IC_Max %>A</p>
+                <p>F_max: <%= data[i].F_Max %>Hz</p>
+                <p>HE: <%= data[i].HE %></p>
+                <p>C max: <%= data[i].T %>°C</p>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

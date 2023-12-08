@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Каталог біполярних транзисторів</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #5a7099;
+            color: #fff;
+            text-align: center;
+            padding: 1em;
+        }
+
+        .catalog {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 20px;
+        }
+
+        .item {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 15px;
+            padding: 18px;
+            text-align: left;
+            background-color: #fff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 200px;
+            box-sizing: border-box;
+        }
+
+        .item img {
+            width: 100%;
+            height: auto;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 10px;
+        }
+
+        .item p {
+            margin: 5px 0;
+        }
+
+        .add-form label {
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .buttons button,
+        .add-form button {
+            display: block;
+            margin-top: 10px;
+            background-color: #4466a6;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+
+        .buttons button:hover,
+        .add-form button:hover{
+            background-color: #0056b3;
+        }
+
+
+        .add-form {
+          display: none;
+        }
+
+        .add-form label {
+            margin-top: 20px;
+        }
+
+        .sort-selector {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .sort-selector label {
+            margin-right: 10px;
+        }
+
+        .sort-selector select {
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        .buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .buttons button {
+            margin: 10px;
+        }
+
+        .search-bar {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .search-bar label,
+        .search-bar input {
+            margin-right: 10px;
+        }
+
+        .search-bar select,
+        .search-bar input {
+            padding: 5px;
+            font-size: 14px;
+        }
+
+        .search-bar button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: #fff;
+        }
+
+        #delete {
+            display: flex;
+            align-items: center;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        #delete input {
+            margin-left: 10px;
+        }
+    </style>
+<script>
+    function renderCatalog(data) {
+            const catalogContainer = document.getElementById('catalog');
+            catalogContainer.innerHTML = '';
+
+            if(data.length == undefined
+                || data.length <= 0)
+            {
+                catalogContainer.innerHTML = 'Неможливо нічого знайти за вашим запитом';
+                return;
+            }
+
+            for (let i = 0; i < data.length; i++) {
+                const item = data[i];
+
+                const itemElement = document.createElement('div');
+                itemElement.classList.add('item');
+                itemElement.innerHTML = `
+                    <img src="${item.ImagePath}" alt="Product Image">
+                    <p>Номер: ${item.ID}</p>
+                    <p>Назва: ${item.Name}</p>
+                    <p>Тип: ${item.Type}</p>
+                    <p>Pc_max: ${item.PC_Max}W</p>
+                    <p>UEce_max: ${item.UCE_Max}V</p>
+                    <p>UEcb_max: ${item.UCB_Max}V</p>
+                    <p>UEeb_max: ${item.UEB_Max}V</p>
+                    <p>Ic_max: ${item.IC_Max}A</p>
+                    <p>F_max: ${item.F_Max}Hz</p>
+                    <p>HE: ${item.HE}</p>
+                    <p>C max: ${item.T}°C</p>
+                `;
+
+                catalogContainer.appendChild(itemElement);
+            }
+    }
+
+    function sortCatalog() {
+            const sortBy = document.getElementById('sortSelector').value;
+
+            const searchBy = document.getElementById('searchType').value;
+            const search = document.getElementById('searchTerm').value
+
+            if(search != '')
+            {
+                fetch(`/getSortedData/${sortBy}/${searchBy}/${search}`)
+                .then(response => response.json())
+                .then(data => {
+                    renderCatalog(data);
+                })
+                .catch(error => console.error('Error fetching sorted data:', error));
+            }
+            else
+            {
+                fetch(`/getSortedData/${sortBy}`)
+                .then(response => response.json())
+                .then(data => {
+                    renderCatalog(data);
+                })
+                .catch(error => console.error('Error fetching sorted data:', error));
+            }
+        }
+
+    function searchCatalog() {
+        const searchBy = document.getElementById('searchType').value;
+        const search = document.getElementById('searchTerm').value
+
+        if(search == '')
+        {
+            sortCatalog();
+            return;
+        }
+
+        fetch(`/getSearchData/${searchBy}/${search}`)
+            .then(response => response.json())
+            .then(data => {
+                const sortBy = document.getElementById('sortSelector').value;
+                sortBy.value = 'Default';
+
+                renderCatalog(data);
+            })
+            .catch(error => console.error('Error fetching searching data:', error));
+    }
+
+  function toggleAddForm() {
+      const addForm = document.getElementById('addForm');
+      addForm.style.display = addForm.style.display === 'none' ? 'block' : 'none';
+
+      const showForm = document.getElementById("show-form");
+
+      if(addForm.style.display == 'none')
+      {
+        showForm.innerText = "Модифікувати";
+      }
+      else
+      {
+        showForm.innerText = "Сховати";
+      }
+  }
+
+  function addProduct() {
+            const productName = document.getElementById('productName').value;
+            const productType = document.getElementById('productType').value;
+            const pcMax = document.getElementById('pcMax').value;
+            const UEce_max = document.getElementById('UEce_max').value;
+            const UEcb_max = document.getElementById('UEcb_max').value;
+            const UEeb_max = document.getElementById('UEeb_max').value;
+            const Ic_max = document.getElementById('Ic_max').value;
+            const F_max = document.getElementById('F_max').value;
+            const H21_e = document.getElementById('H21_e').value;
+            const CMax = document.getElementById('CMax').value;
+
+            const image = document.getElementById('image').files[0];
+
+            const formData = new FormData();
+            formData.append('productName', productName);
+            formData.append('productType', productType);
+            formData.append('pcMax', pcMax);
+            formData.append('UEce_max', UEce_max);
+            formData.append('UEcb_max', UEcb_max);
+            formData.append('UEeb_max', UEeb_max);
+            formData.append('Ic_max', Ic_max);
+            formData.append('F_max', F_max);
+            formData.append('H21_e', H21_e);
+            formData.append('CMax', CMax);
+            formData.append('image', image);
+
+            const response = fetch('/addProduct', {
+                method: 'POST',
+                body: formData,
+            });
+  }
+
+  function remove() {
+    const name = document.getElementById('deleteName').value;
+
+    if(name != '')
+    {
+        fetch(`/remove/${name}`)
+                .then(response => response.json())
+                .then(data => {
+                    renderCatalog(data);
+                })
+                .catch(error => console.error('Error fetching sorted data:', error));
+    }
+  }
+
+  window.addEventListener("load", (event) => {
+    toggleAddForm();
+    sortCatalog();
+  });
+</script>
+</head>
+<body>
+    <header>
+        <h1>Каталог біполярних транзисторів</h1>
+    </header>
+
+    <div class="buttons">
+      <button onclick="toggleAddForm()" id="show-form">Модифікувати</button>
+    </div>
+
+   
+        <div class="add-form" id="addForm">
+
+        <form onsubmit="remove()">
+            <div id="delete">
+                <button id="delete-form" type="submit">Видалити</button>
+                <input type="text" id="deleteName" required placeholder="Введіть назву">
+            </div>
+        </form>
+
+
+        <form onsubmit="addProduct()">
+            <p>Форма характеристик транзистора</p>
+
+            <label for="image">Зображення продукту:</label>
+            <input type="file" id="image" name="image" accept="image/*">
+
+            <label for="productName">Назва продукту:</label>
+            <input type="text" id="productName" name="productName" required placeholder="Введіть назву продукту">
+
+            <label for="productType">Тип продукту:</label>
+            <input type="text" id="productType" name="productType">
+
+            <label for="pcMax">Максимальна потужність розсіювання транзистора Pc_max:</label>
+            <input type=number step=0.01 id="pcMax" name="pcMax">
+
+            <label for="UEce_max">Максимальна напруга переходу колектор-емітер транзистора Uce_max:</label>
+            <input type=number step=0.01 id="UEce_max" name="UEce_max">
+
+            <label for="UEcb_max">Максимальна напруга переходу колектор-база транзистора Ucb_max:</label>
+            <input type=number step=0.01 id="UEcb_max" name="UEcb_max">
+
+            <label for="UEeb_max">Максимальна напруга переходу емітер-база транзистора Ueb_max:</label>
+            <input type=number step=0.01 id="UEeb_max" name="UEeb_max">
+
+            <label for="Ic_max">Максимальний струм колектора транзистора Ic_max:</label>
+            <input type=number step=0.01 id="Ic_max" name="Ic_max">
+
+            <label for="F_max">Гранична частота транзистора Fmax:</label>
+            <input type=number step=0.01 id="F_max" name="F_max">
+
+            <label for="H21_e">Коефіцієнтом підсилення транзистора по струму he:</label>
+            <input type=number step=0.01 id="H21_e" name="H21_e">
+
+            <label for="CMax">Максимальна температура переходів транзистора в С max:</label>
+            <input type=number step=0.01 id="CMax" name="CMax">
+
+            <button type="submit">Додати/Модифікувати</button>
+        </form>
+        </div>
+
+    <div class="search-bar">
+        <label for="searchTerm">Пошук:</label>
+        <select id="searchType">
+            <option value="Name">Назва</option>
+            <option value="Type">Тип</option>
+            <option value="PC_Max">Макс. потужність PC_Max</option>
+            <option value="T">Макс. температура</option>
+            <option value="UCE_Max">Макс. напруга UCE_Max</option>
+            <option value="UCB_Max">Макс. напруга UCB_Max</option>
+            <option value="UEB_max">Макс. напруга UEB_max</option>
+            <option value="IC_max">Макс. струм IC_max</option>
+            <option value="F_max">Гранична частота</option>
+            <option value="HE">Коефіцієнт підсилення</option>
+        </select>
+        <input type="text" id="searchTerm" placeholder="Введіть значення">
+        <button onclick="searchCatalog()">Пошук</button>
+    </div>
+
+    <div class="sort-selector">
+        <label for="sortSelector">Сортувати за:</label>
+        <select id="sortSelector" onchange="sortCatalog()">
+            <option value="Default">По Номеру</option>
+            <option value="UCE_Max">Макс. напруга Uce</option>
+            <option value="PC_Max">Макс. потужність Pc</option>
+            <option value="T">Макс. температура T</option>
+            <option value="HE">Коефіцієнт підсилення HE</option>
+        </select>
+    </div>
+
+
+    <div class="catalog" id="catalog">
+
+    </div>
+</body>
+</html>
