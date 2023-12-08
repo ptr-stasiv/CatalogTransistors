@@ -12,7 +12,7 @@ const IMAGES_DIRECTORY = path.join(__dirname, '../images');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-const port = 80;
+const port = 8080;
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }));
